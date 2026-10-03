@@ -3,7 +3,7 @@
         participant browser
         participant server
 
-        Note right of browser: User fills in input form
+        Note right of browser: User fills in input form and submits
 
         browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note<br/>Content: note=...
         activate server
