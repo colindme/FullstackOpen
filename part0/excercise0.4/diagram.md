@@ -3,12 +3,14 @@
         participant browser
         participant server
 
-        browser->>server: POST https://studies.cs.helsinki.fi/new_note
+        Note right of browser: User fills in input form
+
+        browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note<br/>Content: [{"note" : "..."}]
         activate server
 
-        Note left of server: code runs to add content of POST request as a new node
+        Note left of server: code runs to add content of POST request as a new note
 
-        server-->>browser: 302 redirect
+        server-->>browser: HTTP 302 redirect<br/>Headers: {"Location": "/exampleapp/notes"}
         deactivate server
 
         browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/notes
