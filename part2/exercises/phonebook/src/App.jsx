@@ -3,6 +3,7 @@ import phonebookService from './services/phonebook'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import PersonTable from './components/PersonTable'
+import Notification from './components/Notification'
 
 const App = () => {
   useEffect(() => {
@@ -13,6 +14,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [nameFilter, setNameFilter] = useState('')
+  const [notification, setNotification] = useState(null)
+  const [notificationTimerId, setNotificationId] = useState(undefined)
 
   const handleOnSubmit = (event) => {
     event.preventDefault()
@@ -26,7 +29,7 @@ const App = () => {
     if (personIndex != -1) {
       if (persons[personIndex].number == newNumber)
       {
-        // number already matches, no reason to replace
+        createNotification(`${newName} already exists in the phonebook with that number`, 'warning')
         return;
       }
       if (!window.confirm(`${newName} already exists in the phonebook, would you like to update their number?`))
@@ -38,8 +41,12 @@ const App = () => {
         phonebookService.updatePerson(persons[personIndex].id, newPerson)
           .then(updateResponse => {
             setPersons(persons.map(person => person.id == updateResponse.id ? updateResponse : person))
-            setNewName("")
-            setNewNumber("")
+            setNewName('')
+            setNewNumber('')
+            createNotification(`Updated the number for ${updateResponse.name}`, 'success')
+          })
+          .catch(error => {
+            createNotification(`Failed to update ${newPerson.name}`, 'error')
           })
       }
     }
@@ -48,8 +55,12 @@ const App = () => {
       phonebookService.addNewPerson(newPerson)
         .then(newPersonResponse => {
           setPersons(persons.concat(newPersonResponse))
-          setNewName("")
-          setNewNumber("")
+          setNewName('')
+          setNewNumber('')
+          createNotification(`Added ${newPersonResponse.name} to the phonebook`, 'success')
+        })
+        .catch(error => {
+          createNotification(`Failed to add ${newPerson.name} to the phonebook`, 'error')
         })
     }
   }
@@ -58,6 +69,10 @@ const App = () => {
     phonebookService.deletePerson(personToDelete)
       .then(deleteResponse => {
         setPersons(persons.filter(person => person.id != deleteResponse.id))
+        createNotification(`Deleted ${deleteResponse.name}`, 'success')
+      })
+      .catch(error => {
+        createNotification(`Failed to delete ${personToDelete.name} from the phonebook`, 'error')
       })
   }
 
@@ -78,9 +93,20 @@ const App = () => {
     return persons.filter(person => person.name.toLowerCase().includes(nameFilter))
   }
 
+  const createNotification = (message, type) => {
+    setNotification({ message, type })
+    if (notificationTimerId != undefined)
+    {
+      clearTimeout(notificationTimerId)
+    }
+    let newNotificationId = setTimeout(() => setNotification(null), 5000)
+    setNotificationId(newNotificationId)
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification notification={notification} />
       <Filter value={nameFilter} onChange={handleFilterOnChange} />
       <h2>Add new person to phonebook:</h2>
       <PersonForm newName={newName} newNumber={newNumber} onNameChange={handleNameOnChange} onNumberChange={handleNumberOnChange} onSubmit={handleOnSubmit} />
