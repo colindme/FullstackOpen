@@ -30,15 +30,15 @@ const App = () => {
     else
     {      
       // Direct matching
-      let foundIndex = countryList.find(country => country.name.toLowerCase() === searchFilter.toLowerCase())
-      if (foundIndex != undefined)
+      let matchingCountry = countryList.find(country => country.name.toLowerCase() === searchFilter.toLowerCase())
+      if (matchingCountry != undefined)
       {
         if (searchedCountry != null && searchedCountry.name.common.toLowerCase() == searchFilter.toLowerCase())
         {
           return <Country countryInfo={searchedCountry} />
         }
-
-        getCountryData(searchFilter);
+        
+        getCountryData(matchingCountry.name);
         return <p>Fetching country data...</p>
       }
       
